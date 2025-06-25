@@ -11,6 +11,9 @@ Chart.defaults.color = '#000';
 Chart.defaults.font.size = 14;
 
 const selectData = document.querySelector('#selectData');
+const selectMapTiles = document.querySelector('#selectMapTiles');
+
+selectMapTiles
 
 const checkActive = document.querySelector('#checkActive');
 //const checkAmenity = document.querySelector('#checkAmenity');
@@ -292,6 +295,9 @@ function nodePopup(tags) {
 }
 
 var map;
+var tileLayerOSM;
+var tileLayerGoogle;
+
 
 function createMap() {
 	// Where you want to render the map.
@@ -303,9 +309,11 @@ function createMap() {
 		preferCanvas: true
 	});
 	// Add OSM tile layer to the Leaflet map.
-	L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+	tileLayerOSM = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
 		attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-	}).addTo(map);
+	});
+
+	//tileLayerOSM.addTo(map);
 	// Target's GPS coordinates.
 	var target = L.latLng('37.87', '-122.27'); // berkeley 37°52′18″N 122°16′22″W
 	// Set map's center to target with zoom 14.
@@ -313,13 +321,38 @@ function createMap() {
 	// add geojson precincts to map
 
 	// add google aerial to map
-	/*
-	var tiles = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+	
+	tileLayerGoogle = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
 		maxZoom: 20,
 		subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
-	}).addTo(map);*/
+	});
+	tileLayerGoogle.addTo(map);
 
 }
+
+// changes whenever the tile selector
+
+selectMapTiles.addEventListener("change", async (event) => {
+	const tileSpec =  selectMapTiles.value;
+	
+	if (tileSpec == 'none') {
+		tileLayerGoogle.remove();
+		tileLayerOSM.remove();
+		return;
+	}
+	if (tileSpec == 'osm') {
+		tileLayerGoogle.remove();
+		tileLayerOSM.addTo(map);
+		return;
+	}
+	if (tileSpec == 'google') {
+		tileLayerGoogle.addTo(map);
+		tileLayerOSM.remove();
+		return;
+	}
+
+  });
+
 
 function createLegend() {
 	const legend = L.control.Legend({
