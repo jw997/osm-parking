@@ -1,0 +1,466 @@
+<!doctype html>
+
+<head>
+
+	<meta name="viewport"
+		content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, shrink-to-fit=no">
+	<style>
+		:root {
+			--displayCollisionChart: none;
+			--displayStopChart: inline-block;
+		}
+
+	
+
+		body {
+			background-color: white;
+		}
+
+		.sansserif {
+			font-family: Verdana, Arial, Helvetica, sans-serif;
+		}
+
+		label,
+		select,
+		input,
+		#summary {
+			margin-left: 10px;
+		}
+
+		.button {
+			background-color: white;
+			border: 1PX SOLID black;
+			color: black;
+			padding: 5px 10px 5px 10px;
+			text-align: center;
+			text-decoration: none;
+			display: inline-block;
+			font-size: small;
+			margin: 4px 2vw;
+			border-radius: 99999vmax;
+			max-width: 33%;
+			min-width: calc(44px + 2rem);
+			min-height: 44px;
+			height: 44px;
+			visibility: visible;
+			box-sizing: border-box;
+			/* touch-action: none; 
+			
+			vertical-align: center;
+			-moz-box-align: center;
+			position: relative;*/
+
+		}
+
+		#saveanchor {
+			position: relative;
+			top: -2px;
+			padding-top: 7px;
+		}
+
+		.button:hover {
+			background-color: lightgrey;
+		}
+
+		.select {
+			font-size: small;
+			color: black;
+		}
+
+		.chart {
+			border: 1PX SOLID black;
+			margin: 10px;
+			/*display: var(--displayStopChart);*/
+		}
+
+		.info {
+			padding: 6px 8px;
+			font: 14px/16px Arial, Helvetica, sans-serif;
+			background: white;
+			background: rgba(255, 255, 255, 0.8);
+			box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+			border-radius: 5px;
+		}
+
+		.info h4 {
+			margin: 0 0 5px;
+			color: #777;
+		}
+
+		.legend {
+			line-height: 18px;
+			color: #555;
+		}
+
+		.legend i {
+			width: 18px;
+			height: 18px;
+			float: left;
+			margin-right: 8px;
+			opacity: 0.8;
+		}
+
+		#query-stuff {
+
+			background-color: rgb(96 139 168 / 0.5);
+
+			overflow-y: scroll;
+			border: 1px solid black;
+			/*
+			padding: 1em;
+			border: 5px solid red;
+*/
+		}
+
+		#osm-map {
+			border: 1px solid black;
+		}
+
+		#selectStreet {
+			display: block;
+		}
+
+		.grid-container {
+			display: grid;
+
+			grid-gap: 20px;
+			overflow-y: auto;
+
+		}
+
+		/* small devices */
+		@media only screen and (max-width: 991px) and (orientation: portrait) {
+			#osm-map {
+				grid-column: 1;
+				grid-row: 1;
+				/*max-height: 40vh;*/
+				max-width: 100vh;
+			}
+
+			#query-stuff {
+				grid-column: 1;
+				grid-row: 2;
+			}
+
+			.grid-container {
+				grid-template-rows: 60% 37%;
+				height: 98vh;
+			}
+		}
+
+		/*
+		@media only screen and (max-width: 991px) and (orientation: portrait){
+			#osm-map {
+				grid-column: 1;
+				grid-row: 1;
+				max-height: 40vh;
+				max-width: 100vh;
+			}
+
+			#query-stuff {
+				grid-column: 1;
+				grid-row: 2;
+			}
+
+			.grid-container {
+				grid-template-rows: 20rem 1fr;
+				height: 95vh;
+			}
+		}
+*/
+		@media only screen and (max-width: 991px) and (orientation: landscape) {
+			#osm-map {
+				grid-column: 1;
+				grid-row: 1;
+				max-height: 100vh;
+				/*max-width: 50vh;*/
+			}
+
+			#query-stuff {
+				grid-column: 2;
+				grid-row: 1;
+			}
+
+			.grid-container {
+				/*grid-template-rows: 50vh 1fr;*/
+				grid-template-columns: 60% 40%;
+				height: 85vh;
+			}
+		}
+
+		/* Large devices (laptops/desktops, 992px and up) */
+		@media only screen and (min-width: 992px) {
+			#osm-map {
+				grid-column: 2;
+				grid-row: 1;
+			}
+
+			#query-stuff {
+				grid-column: 1;
+				grid-row: 1;
+			}
+
+			.grid-container {
+				grid-template-columns: max(15rem, 25%) auto;
+				height: 98vh;
+			}
+
+			/*
+			.grid-container {
+				grid-template-columns: 20rem 1fr;
+				height: 98vh;
+			}*/
+		}
+	</style>
+
+	<!---
+	<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+	<link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet" />
+
+	-->
+	<script src="./dependencies/leaflet/1.9.4/leaflet.js"></script>
+	<link href="./dependencies/leaflet/1.9.4/leaflet.css" rel="stylesheet" />
+
+	<link rel="stylesheet" href="./dependencies/legend/leaflet.legend.css" />
+	<script type="text/javascript" src="./dependencies/legend/leaflet.legend.js"></script>
+</head>
+
+<body class="sansserif body-container">
+	<div class="grid-container">
+		<div id="query-stuff">
+			
+			<label>Select export date</label>
+					<br />
+			<select id="selectData" class="select">
+				<option value=".">Latest</option>
+				<!--<option value=".2025-06-01.">2025-06-01</option>-->
+			</select>
+		<!--<br />
+			<label>Select by osm item type</label>
+			<br />
+
+			<input type="checkbox" id="checkNode" checked="yes"> <label for="checkNode">Node</label><br>		
+			<input type="checkbox" id="checkWay" checked="yes"> <label for="checkWay">Way</label><br>
+			<input type="checkbox" id="checkRelation" checked="yes"> <label for="checkRelation">Relation</label><br>
+		-->
+<br><label>Select by parking type</label>
+<br />
+			<input type="checkbox" id="checkMultilevel" checked="yes"> <label for="checkMultilevel">Multilevel</label><br>		
+			<input type="checkbox" id="checkUnderground" checked="yes"> <label for="checkUnderground">Underground</label><br>
+			<input type="checkbox" id="checkSurface" checked="yes"> <label for="checkSurface">Surface</label><br>
+
+<br />
+	
+			<label>Select by Geography</label>
+			<br />
+
+<input type="checkbox" id="checkBerkeley" checked="yes"> <label for="checkBerkeley">Berkeley</label><br>
+
+<label>Business Districts</label><br/>
+<input type="checkbox" id="checkDowntown"> <label for="checkDowntown">Downtown</label><br>
+<input type="checkbox" id="checkNorthside"> <label for="checkNorthside">Northside</label><br>
+<input type="checkbox" id="checkFourth"> <label for="checkFourth">Fourth</label><br>
+<input type="checkbox" id="checkGilman"> <label for="checkGilman">Gilman</label><br>
+<input type="checkbox" id="checkWestbrae"> <label for="checkWestbrae">Westbrae</label><br>
+<input type="checkbox" id="checkNorthbrae"> <label for="checkNorthbrae">Northbrae</label><br>
+<input type="checkbox" id="checkSolano"> <label for="checkSolano">Solano</label><br>
+<input type="checkbox" id="checkNorthshattuck"> <label for="checkNorthshattuck">Northshattuck</label><br>
+<input type="checkbox" id="checkUniversity"> <label for="checkUniversity">University</label><br>
+<input type="checkbox" id="checkTelegraph"> <label for="checkTelegraph">Telegraph</label><br>
+<input type="checkbox" id="checkElmwood"> <label for="checkElmwood">Elmwood</label><br>
+<input type="checkbox" id="checkLorin"> <label for="checkLorin">Lorin</label><br>
+
+<label>Streets</label><br/>
+<input type="checkbox" id="checkSanpabloave"> <label for="checkSanpabloave">San Pablo Avenue</label><br>
+<input type="checkbox" id="checkUniversityave"> <label for="checkUniversityave">University Avenue</label><br>
+<input type="checkbox" id="checkSacramentoave"> <label for="checkSacramentoave">Sacramento Avenue</label><br>
+<input type="checkbox" id="checkMlkway"> <label for="checkSacracheckMlkwaymentoave">MLK Way</label><br>
+
+
+
+<!-- ADD NEW GEO FILTER -->
+
+<!---
+
+Fourth
+
+
+
+
+
+
+
+
+
+
+			<input type="checkbox" id="check2024"> <label for="check2024">2024</label><br>
+			<input type="checkbox" id="check2023"> <label for="check2023">2023</label><br>
+			<input type="checkbox" id="check2022"> <label for="check2022">2022</label><br>
+			<input type="checkbox" id="check2021"> <label for="check2021">2021</label><br>
+			<input type="checkbox" id="check2020"> <label for="check2020">2020</label><br>
+			<input type="checkbox" id="check2019"> <label for="check2019">2019</label><br>
+			<input type="checkbox" id="check2018"> <label for="check2018">2018</label><br>
+			<input type="checkbox" id="check2017"> <label for="check2017">2017</label><br>
+			<input type="checkbox" id="check2016"> <label for="check2016">2016</label><br>
+			<input type="checkbox" id="check2015"> <label for="check2015">2015</label><br>
+
+
+
+			<br />
+			<label>Pick crash participants</label>
+			<br />
+			<select id="selectVehicleTypes" class="select">
+				<option value='.*'>Any</option>
+				<option value='Car'>Car/Any</option>
+				<option value='Bi.*Car'>Car/Bicycle</option>
+				<option value='Car.*Ped|Ped.*Car'>Car/Pedestrian</option>
+				<option value='Car.*Solo|Car.*Object'>Car/Solo</option>
+
+				<option value='Bi'>Bicycle/Any</option> // includes electric bike?
+				<option value='Bi.*Ped'>Bicycle/Pedestrian</option>
+				<option value='Bicycle$|Bi.*Solo'>Bicycle/Solo</option>
+
+				<option value='Ped'>Pedestrian/Any</option>
+
+				<option value='Electric Bi'>Electric bicycle/Any</option>
+				<option value='Electric Bi.*Ped'>Electric bicycle/Pedestrian</option>
+				<option value='Electric Sc'>Electric Scooter/Any</option>
+				<option value='Electric Sc.*Ped'>Electric Scooter/Pedestrian</option>
+				<option value='Electric Skate'>Electric Skateboard/Any</option>
+				<option value='Electric Skate.*Ped'>Electric Skateboard/Pedestrian</option>
+
+				<option value='Motor'>Motorcycle/Any</option>
+				<option value='Motor.*Car'>Motorcycle/Car</option>
+
+				<option value='Truck'>Truck/Any</option>
+
+				<option value='Bus'>Bus/Any</option>
+			</select>
+			<br />
+
+			<label>Pick street</label>
+			<select id="selectStreet" class="select">
+				<option>Any</option>
+			</select>
+
+			<label>Pick crash severity</label>
+			<br />
+
+			<select id='severity' class="select">
+				<option value='Any'>Any</option>
+				<option value='Fatal'>Fatality</option>
+				<option value='Serious Injury'>Serious Injury</option>
+				<option value='Minor Injury'>Minor Injury</option>
+				<option value='Possible Injury'>Possible Injury</option>
+				<option value='No Injury'>Non-Injury</option>
+			</select>
+
+			<br />
+			<label>Pick stop result</label>
+			<br />
+
+			<select id='stopResult' class="select">
+				<option value='Any'>Any</option>
+				<option value='Arrest'>Arrest</option>
+				<option value='Citation'>Citation</option>
+				<option value='Warning'>Warning</option>
+				<option value='No Action'>No Action</option>
+			</select>
+
+			<br />
+
+			--->
+
+			<button id="filterButton" class="button">Filter</button>
+			
+			<a id='saveanchor' class='button' download='osm-data.json'>Export</a>
+			
+			<div id='summary'></div>
+
+			<!-- ADD NEW CHART -->
+			<div><canvas id="parkingHist" class="chart"></canvas></div>
+			<!---
+
+					<div><canvas id="shopHist" class="chart"></canvas></div>
+		
+			<div><canvas id="yearHist" class="chart"></canvas></div>
+			<div><canvas id="hourHist" class="chart"></canvas></div>
+			<div><canvas id="involvedObjectHist" class="chart collisionChart"></canvas></div>
+			<div><canvas id="severityHist" class="chart collisionChart"></canvas></div>
+
+			<div><canvas id="crashFaultHist" class="chart collisionChart"></canvas></div>
+			<div><canvas id="ageInjuryHist" class="chart collisionChart"></canvas></div>
+			
+
+			<div><canvas id="stopResultHist" class="chart stopChart"></canvas></div>
+
+
+			<div><canvas id="gpsHist" class="chart"></canvas></div>
+			-->
+		</div>
+		<div id="osm-map"></div>
+	</div>
+
+	<!--- <script src="https://unpkg.com/chart.js@4.2.0/dist/chart.umd.js"></script> -->
+
+	<script src="./dependencies/chart/4.2.0/chart.umd.js"></script>
+
+	<script src="./dependencies/turf/7.2.0/turf.min.js" charset="utf-8"></script>
+	<!-- now turf is a global object https://turfjs.org/docs/getting-started -->
+
+	<script type="module">
+		import {
+			
+			
+			
+			  handleFilterClick
+		} from "./js/util.js";
+
+		// BEGIN INIT STUFF
+		//const selectStreet = document.querySelector('#selectStreet');
+		//populateStreetSelect(mergedTransparencyJson, selectStreet);
+
+		// END INIT STUFF
+
+		document.querySelector('#filterButton').addEventListener('click', (event) => {
+			handleFilterClick();
+
+		});
+/*
+		document.querySelector('#selectData').addEventListener('change', (event) => {
+
+			console.log("Setting visisbility")
+
+			const dataSpec = document.querySelector('#selectData').value;
+
+			var r = document.querySelector(':root');
+
+
+			switch (selectData.value) {
+				case 'T':
+				case 'S':
+				case "SUT":
+					for (const elem of document.querySelectorAll('.stopChart')) {
+						elem.style.display = 'none';
+					}
+					for (const elem of document.querySelectorAll('.collisionChart')) {
+						elem.style.display = '';
+					}
+					break;
+				case "STOPS":
+					r.style.setProperty('--displayCollisionChart', 'none');
+					r.style.setProperty('--displayStopChart', 'inline-block');
+					for (const elem of document.querySelectorAll('.collisionChart')) {
+						elem.style.display = 'none';
+					}
+					for (const elem of document.querySelectorAll('.stopChart')) {
+						elem.style.display = '';
+					}
+					break;
+
+			};
+		})
+*/
+
+	</script>
+</body>
