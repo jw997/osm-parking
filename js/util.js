@@ -321,7 +321,7 @@ function createMap() {
 	// add geojson precincts to map
 
 	// add google aerial to map
-	
+
 	tileLayerGoogle = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
 		maxZoom: 20,
 		subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
@@ -333,8 +333,8 @@ function createMap() {
 // changes whenever the tile selector
 
 selectMapTiles.addEventListener("change", async (event) => {
-	const tileSpec =  selectMapTiles.value;
-	
+	const tileSpec = selectMapTiles.value;
+
 	if (tileSpec == 'none') {
 		tileLayerGoogle.remove();
 		tileLayerOSM.remove();
@@ -351,7 +351,7 @@ selectMapTiles.addEventListener("change", async (event) => {
 		return;
 	}
 
-  });
+});
 
 
 function createLegend() {
@@ -739,6 +739,9 @@ var nCountVacant = 0;
 var nCountShop = 0;
 var nCountLand = 0;
 
+var dataCapacityVsCalculated = [];
+
+
 function addMarkers(osmJson
 	//filterShop,
 	//filterVacant,
@@ -757,6 +760,7 @@ function addMarkers(osmJson
 
 ) {
 	//removeAllMakers();
+	dataCapacityVsCalculated = [];
 	const markersAtLocation = new Map();
 	// add collisions to map
 	var markerCount = 0
@@ -886,7 +890,7 @@ function addMarkers(osmJson
 				incrementMapKey(histParkingData, arrParkingKeys[1]);
 			} else if (bUnderground) {
 				incrementMapKey(histParkingData, arrParkingKeys[2]);
-			} 
+			}
 
 			/*
 						if (bVacant) {
@@ -971,6 +975,12 @@ function addMarkers(osmJson
 
 			}
 
+
+			if (tags.capacity && tags.computed_capacity) {
+				const datum = { x: parseInt(tags.capacity), y: tags.computed_capacity };
+				dataCapacityVsCalculated.push(datum);
+
+			}
 
 			countParkingLots++;
 			if (tags.capacity) {
@@ -1120,6 +1130,9 @@ clearFaultData();
 // chart variables
 // ADD NEW CHART
 var histParkingChart;
+
+var scatterCapacity;
+
 /*
 var histShopChart;
 
@@ -1136,6 +1149,87 @@ var histAgeInjuryChart;
 var histStopResultChart;
 
 */
+
+
+function addData(chart, label, newData) {
+	chart.data.labels.push(label);
+	chart.data.datasets.forEach((dataset) => {
+		dataset.data = newData;
+	});
+	chart.update();
+}
+
+function removeData(chart) {
+	chart.data.labels.pop();
+	chart.data.datasets.forEach((dataset) => {
+		dataset.data = [];
+	});
+	chart.update();
+}
+
+function createOrUpdateScatterChart(xydata, chartVar, element, labelText) {
+	// data should be an array of objects with integer members  x and y
+
+	const data = {
+		datasets: [
+			{
+				label: 'Parking Capacity',
+				data: xydata 
+			}
+		]
+	};
+
+	const config = {
+		type: 'scatter',
+		data: data,
+		options: {
+			responsive: true,
+			plugins: {
+				legend: {
+					position: 'top',
+				},
+				title: {
+					display: false,
+					text: 'Reported vs computed capacity'
+				}
+			},
+
+			scales: {
+				x: {
+					min: 0,
+					type: 'linear',
+					position: 'bottom',
+					title: {
+						color: 'red',
+						display: true,
+						text: 'Reported Capacity'
+					}
+				},
+				y: {
+					min:0,
+					type: 'linear',
+					position: 'left',
+					title: {
+						color: 'red',
+						display: true,
+						text: 'Calculated Capacity'
+					}
+				}
+			}
+		}
+
+	};
+
+	if (chartVar == undefined) {
+		chartVar = new Chart(element, config);
+	} else {
+
+		removeData(chartVar);
+		addData(chartVar, "updated label", xydata);
+	}
+	return chartVar;
+}
+
 
 function createOrUpdateChart(data, chartVar, element, labelText) {
 	// data should be an array of objects with members bar and count
@@ -1274,7 +1368,15 @@ function handleFilterClick() {
 	histParkingChart = createOrUpdateChart(dataParking, histParkingChart, document.getElementById('parkingHist'),
 		'Parking');
 
-	
+
+	/* make scatter chart */
+
+
+	scatterCapacity = createOrUpdateScatterChart(dataCapacityVsCalculated, scatterCapacity, document.getElementById('countVsCalculationScatter'),
+		'Capacity vs Calculated Capacity');
+
+
+
 
 	/*	
 	
