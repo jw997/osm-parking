@@ -13,7 +13,6 @@ Chart.defaults.font.size = 14;
 const selectData = document.querySelector('#selectData');
 const selectMapTiles = document.querySelector('#selectMapTiles');
 
-selectMapTiles
 
 const checkActive = document.querySelector('#checkActive');
 //const checkAmenity = document.querySelector('#checkAmenity');
@@ -312,6 +311,7 @@ function createMap() {
 	tileLayerOSM = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
 		attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
 	});
+	tileLayerOSM.addTo(map);
 
 	//tileLayerOSM.addTo(map);
 	// Target's GPS coordinates.
@@ -326,7 +326,7 @@ function createMap() {
 		maxZoom: 20,
 		subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
 	});
-	tileLayerGoogle.addTo(map);
+	//tileLayerGoogle.addTo(map); default to just osm
 
 }
 
@@ -742,23 +742,7 @@ var nCountLand = 0;
 var dataCapacityVsCalculated = [];
 
 
-function addMarkers(osmJson
-	//filterShop,
-	//filterVacant,
-	//filterLand
-	/*filterAmenity,
-
-	filterDisusedShop,
-	filterDisusedAmenity,
-
-	filterOtherAmenity*/
-	/*, tsSet, histYearData, histHourData, histFaultData, histAgeInjuryData,
-	vehTypeRegExp,
-	filter2024, filter2023, filter2022, filter2021, filter2020,
-	filter2019, filter2018, filter2017, filter2016, filter2015,
-	selectStreet, selectSeverity, selectStopResult*/
-
-) {
+function addMarkers(osmJson) {
 	//removeAllMakers();
 	dataCapacityVsCalculated = [];
 	const markersAtLocation = new Map();
@@ -796,18 +780,7 @@ function addMarkers(osmJson
 		if (!bUnderground && !bMultilevel) {
 			bSurface = true;  // default weird types to surface
 		}
-		/*
-				if (bNode && !checkNode.checked) {
-					continue
-				}
-				if (bWay && !checkWay.checked) {
-					continue
-				}
-		
-				if (bRelation && !checkRelation.checked) {
-					continue
-				}
-				*/
+
 
 		if (bMultilevel && !checkMultilevel.checked) {
 			continue
@@ -832,30 +805,7 @@ function addMarkers(osmJson
 		}
 
 		var bInclude = true; //
-		/*
-				const bShop = isShop(tags);
-				const bVacant = !bShop && isVacant(tags);
-				const bLand = isLand(tags);
-		*/
-		//	console.log("Name:", tags.name, " shop:", bShop, " vacant:", bVacant);
-		/*
-				if (filterShop) {
-					if (bShop) {
-						bInclude = true;
-					}
-				}
-		
-				if (filterVacant) {
-					if (bVacant) {
-						bInclude = true;
-					}
-				}
-		
-				if (filterLand) {
-					if (bLand) {
-						bInclude = true;
-					}
-				}*/
+
 		if (!bInclude) {
 			//	console.log("Filtered out ", tags.name);
 			//	incrementMapKey(histShopData, arrShopKeys[2]);
@@ -923,12 +873,26 @@ function addMarkers(osmJson
 				if (!tags.capacity) {
 					console.log("No capacity for node ", tags.id)
 				}
+				var marker = L.circleMarker([lat, long], opt);
+
+
+				var msg = nodePopup(tags)
+
+
+				marker.bindPopup(msg).openPopup();
+
+
+				marker.addTo(map);
+				markers.push(marker);  // used to remove anchor dots 
 			}
+
+
 
 			if (bWay) {
 				opt = getOptionsForMarker('land');
 				opt.fillOpacity = .3
 				const polyMarker = L.geoJSON(osmItem, opt);
+
 				polyMarker.addTo(map);
 				markers.push(polyMarker);
 
@@ -948,7 +912,10 @@ function addMarkers(osmJson
 					osmItem.properties.tags.computed_area = Math.floor(area);
 
 					osmItem.properties.tags.computed_capacity = Math.floor(area / SQAURE_METERS_PER_PARKING_SPACE);
+
 				}
+				var msg = nodePopup(tags);
+				polyMarker.bindPopup(msg);
 			}
 			if (bRelation) { // relations are for parking lots with holes aka multi-polygons
 
@@ -956,6 +923,7 @@ function addMarkers(osmJson
 				opt.fillOpacity = .3
 				const polyMarker = L.geoJSON(osmItem, opt);
 				polyMarker.addTo(map);
+				polyMarker.bindPopup(msg);
 				markers.push(polyMarker);
 
 				if (osmItem.geometry.type == 'MultiPolygon') {
@@ -972,6 +940,8 @@ function addMarkers(osmJson
 
 					osmItem.properties.tags.computed_capacity = Math.floor(area / SQAURE_METERS_PER_PARKING_SPACE);
 				}
+				var msg = nodePopup(tags);
+				polyMarker.bindPopup(msg);
 
 			}
 
@@ -991,22 +961,7 @@ function addMarkers(osmJson
 					countParkingSpaces += parseInt(tags.computed_capacity);
 				}
 			}
-			var marker = L.circleMarker([lat, long], opt);
 
-
-			var msg = nodePopup(tags)
-
-
-			if (pointerFine) {
-
-				//marker.bindTooltip(msg).openTooltip(); can copy from tooltip!
-				marker.bindPopup(msg).openPopup();
-			} else {
-				marker.bindPopup(msg).openPopup();
-			}
-
-			marker.addTo(map);
-			markers.push(marker);  // used to remove anchor dots 
 
 			markerCount++;
 		} else {
@@ -1174,7 +1129,7 @@ function createOrUpdateScatterChart(xydata, chartVar, element, labelText) {
 		datasets: [
 			{
 				label: 'Parking Capacity',
-				data: xydata 
+				data: xydata
 			}
 		]
 	};
@@ -1206,7 +1161,7 @@ function createOrUpdateScatterChart(xydata, chartVar, element, labelText) {
 					}
 				},
 				y: {
-					min:0,
+					min: 0,
 					type: 'linear',
 					position: 'left',
 					title: {
