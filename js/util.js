@@ -210,6 +210,10 @@ const mlkwayGeoJson = await getDataFile('mlkway.geojson');
 //const temescalGeoJson = await getDataFile('temescal.geojson');
 //const valenciaGeoJson = await getDataFile('valencia.geojson');
 
+// street network files
+const narrowStreetsLT20GeoJson = await getDataFile('widthLT20Berkeley.geojson');
+const narrowStreets2026GeoJson = await getDataFile('width20to26Berkeley.geojson');
+
 
 var berkeleyTurfPolygon = turf.polygon(cityGeoJson.features[0].geometry.coordinates);
 // make a turf polygon for the downtown busines district so we can clip points to it
@@ -311,7 +315,18 @@ function createMap() {
 	tileLayerOSM = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
 		attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
 	});
-	tileLayerOSM.addTo(map);
+
+	const tileSpec = selectMapTiles.value;
+
+
+	if (tileSpec == 'osm') {
+		
+		tileLayerOSM.addTo(map);
+		
+	}
+	
+
+	
 
 	//tileLayerOSM.addTo(map);
 	// Target's GPS coordinates.
@@ -326,7 +341,13 @@ function createMap() {
 		maxZoom: 20,
 		subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
 	});
-	//tileLayerGoogle.addTo(map); default to just osm
+
+	if (tileSpec == 'google') {
+		tileLayerGoogle.addTo(map);
+	
+
+	}
+	
 
 }
 
@@ -419,6 +440,27 @@ L.geoJSON(lorinGeoJson, { fillOpacity: 0.05 }).addTo(map);
 //L.geoJSON(sanpabloaveGeoJson, { fillOpacity: 0.05 }).addTo(map);
 //L.geoJSON(universityaveGeoJson, { fillOpacity: 0.05 }).addTo(map);
 // ADD NEW GEO FILTER
+
+// add narrow streets
+//   "PAV_WIDTH_RD": 15,
+function onEachFeature(feature, layer) {
+    // does this feature have a property named popupContent?
+    if (feature.properties && feature.properties.PAV_WIDTH_RD) {
+		var msg = 'Width: ' + feature.properties.PAV_WIDTH_RD + ' feet' ;
+
+		if (feature.properties.block_addr) {
+			msg += '<br/>' +feature.properties.block_addr;
+		}
+        layer.bindPopup(msg);
+    }
+}
+
+
+L.geoJSON(narrowStreetsLT20GeoJson, { color: w3_highway_red, fillOpacity: 0.05,    onEachFeature: onEachFeature }).addTo(map);
+
+L.geoJSON(narrowStreets2026GeoJson, { color: w3_highway_yellow, fillOpacity: 0.05,    onEachFeature: onEachFeature }).addTo(map);
+
+
 
 
 const resizeObserver = new ResizeObserver(() => {
