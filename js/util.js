@@ -31,7 +31,10 @@ const checkUnderground = document.querySelector('#checkUnderground');
 const checkSurface = document.querySelector('#checkSurface');
 
 
-
+// street parking filters
+const checkStreet = document.querySelector('#checkStreet');
+const checkStreetNarrow = document.querySelector('#checkStreetNarrow');
+const checkStreetVeryNarrow = document.querySelector('#checkStreetVeryNarrow');
 
 // geo filters
 const checkBerkeley = document.querySelector('#checkBerkeley');
@@ -320,13 +323,13 @@ function createMap() {
 
 
 	if (tileSpec == 'osm') {
-		
-		tileLayerOSM.addTo(map);
-		
-	}
-	
 
-	
+		tileLayerOSM.addTo(map);
+
+	}
+
+
+
 
 	//tileLayerOSM.addTo(map);
 	// Target's GPS coordinates.
@@ -344,10 +347,10 @@ function createMap() {
 
 	if (tileSpec == 'google') {
 		tileLayerGoogle.addTo(map);
-	
+
 
 	}
-	
+
 
 }
 
@@ -444,21 +447,21 @@ L.geoJSON(lorinGeoJson, { fillOpacity: 0.05 }).addTo(map);
 // add narrow streets
 //   "PAV_WIDTH_RD": 15,
 function onEachFeature(feature, layer) {
-    // does this feature have a property named popupContent?
-    if (feature.properties && feature.properties.PAV_WIDTH_RD) {
-		var msg = 'Width: ' + feature.properties.PAV_WIDTH_RD + ' feet' ;
+	// does this feature have a property named popupContent?
+	if (feature.properties && feature.properties.PAV_WIDTH_RD) {
+		var msg = 'Width: ' + feature.properties.PAV_WIDTH_RD + ' feet';
 
 		if (feature.properties.block_addr) {
-			msg += '<br/>' +feature.properties.block_addr;
+			msg += '<br/>' + feature.properties.block_addr;
 		}
-        layer.bindPopup(msg);
-    }
+		layer.bindPopup(msg);
+	}
 }
 
 
-L.geoJSON(narrowStreetsLT20GeoJson, { color: w3_highway_red, fillOpacity: 0.05,    onEachFeature: onEachFeature }).addTo(map);
+L.geoJSON(narrowStreetsLT20GeoJson, { color: w3_highway_red, fillOpacity: 0.05, onEachFeature: onEachFeature }).addTo(map);
 
-L.geoJSON(narrowStreets2026GeoJson, { color: w3_highway_yellow, fillOpacity: 0.05,    onEachFeature: onEachFeature }).addTo(map);
+L.geoJSON(narrowStreets2026GeoJson, { color: w3_highway_yellow, fillOpacity: 0.05, onEachFeature: onEachFeature }).addTo(map);
 
 
 
@@ -783,6 +786,37 @@ var nCountLand = 0;
 
 var dataCapacityVsCalculated = [];
 
+const carLength = 22;
+
+const regStreetskm = 321;
+const narrowStreetskm = 65;
+const veryNarrowStreetskm = 14;
+
+const ftPerKm = 1602;
+
+const regStreetsft = regStreetskm*ftPerKm;
+const narrowStreetsft = narrowStreetskm*ftPerKm;
+const veryNarrowStreetsft = veryNarrowStreetskm*ftPerKm;
+
+const parkability = 0.67;  // computed from sample blocks, percent of length usable for parking
+
+const regStreetSides = 2;
+const narrowStreetSides = 1;
+const veryNarrowStreetSides = 0;
+
+const regStreetsParking = Math.floor(regStreetsft*regStreetSides* parkability / carLength);
+const narrowStreetsParking = Math.floor( narrowStreetsft*narrowStreetSides* parkability / carLength);
+const veryNarrowStreetsParking = Math.floor(veryNarrowStreetsft*veryNarrowStreetSides* parkability / carLength);
+
+function makeStreetMsg() {
+	var msg = 
+	
+	'Street Parking >=26 feet: ' + regStreetsParking + '</br>' + 
+	'Street Parking 20-26 feet: ' + narrowStreetsParking + '</br>' + 
+	'Street Parking: <= 20 feet: ' + veryNarrowStreetsParking + '</br>';
+
+	return msg;
+}
 
 function addMarkers(osmJson) {
 	//removeAllMakers();
@@ -866,10 +900,12 @@ function addMarkers(osmJson) {
 			const loc = [lat, long];
 			const tp = turf.point([long, lat]);
 
+			/* turn off geofilter for now 
 			const bGeoFilter = checkGeoFilter(tp);
 			if (!bGeoFilter) {
 				continue;
 			}
+			*/
 
 			tags.lat = lat;
 			tags.lon = long;
@@ -1017,13 +1053,22 @@ function addMarkers(osmJson) {
 	console.log('Plotted', plotted);
 	console.log("markerCount ", markerCount)
 
+
+
+	const streetMsg = makeStreetMsg() ;
+
 	const summaryMsg = '<br>Parking lots:' + countParkingLots +
-		'<br>Spaces: ' + countParkingSpaces +
+		'<br>Parking Lot Spaces: ' + countParkingSpaces +
 		'<br>Parking Area (m^2): ' + Math.floor(areaParking) +
 		'<br>Parking Area percentage : ' + (100.0 * areaParking / CITY_LAND_AREA).toFixed(2)
 		// 27.02 km2 city land area on wikipedia
 
+		+ '<br>' + '<br>'
+		+ streetMsg
 		+ '<br>';
+		
+	
+
 	summary.innerHTML = summaryMsg;
 
 	// set array for download
