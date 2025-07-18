@@ -3,8 +3,18 @@ import { getJson } from "./utils_helper.js";
 // touch or mouse?
 let mql = window.matchMedia("(pointer: fine)");
 const pointerFine = mql.matches;
-const SQAURE_METERS_PER_PARKING_SPACE = 35;  // just a guess
+const SQUARE_METERS_PER_PARKING_SPACE = 35;  // just a guess for estimating parking spaces in a lot
+
 const CITY_LAND_AREA = 27000000; // area in m^2 of land from wikipedia
+
+const SQUARE_METERS_PER_STREET_PARKING_SPACE = 16.7;   // used to compute area occupied by on street parking
+//https://usa.streetsblog.org/2016/07/05/parking-takes-up-more-space-than-you-think
+
+const SFH_COUNT = 23945
+// from DPO4 ACS 5 year 2023
+// https://data.census.gov/table/ACSST5Y2023.S2504?q=vehicle&g=060XX00US0600190200
+const OFFSTREET_HOUSING_PER_SFH = 1.5
+
 
 // set default chart font color to black
 Chart.defaults.color = '#000';
@@ -12,7 +22,6 @@ Chart.defaults.font.size = 14;
 
 const selectData = document.querySelector('#selectData');
 const selectMapTiles = document.querySelector('#selectMapTiles');
-
 
 const checkActive = document.querySelector('#checkActive');
 //const checkAmenity = document.querySelector('#checkAmenity');
@@ -60,9 +69,7 @@ const checkUniversityave = document.querySelector('#checkUniversityave');
 const checkSacramentoave = document.querySelector('#checkSacramentoave');
 const checkMlkway = document.querySelector('#checkMlkway');
 
-//const checkDisusedAmenity = document.querySelector('#checkDisusedAmenity');
 
-//const checkOtherAmenity = document.querySelector('#checkOtherAmenity');
 
 
 const summary = document.querySelector('#summary');
@@ -663,123 +670,6 @@ function getPointFromeature(feature) {
 				}*/
 
 
-function checkGeoFilter(tp) {
-
-	var retval = false;
-
-	if (checkBerkeley.checked) {
-		if (turf.booleanPointInPolygon(tp, berkeleyTurfPolygon)) {
-			retval = true;
-		}
-	}
-
-	if (checkDowntown.checked) {
-		if (turf.booleanPointInPolygon(tp, downtownTurfPolygon)) {
-			retval = true;
-		}
-	}
-	if (checkNorthside.checked) {
-		if (turf.booleanPointInPolygon(tp, northsideTurfPolygon)) {
-			retval = true;
-		}
-	}
-	if (checkFourth.checked) {
-		if (turf.booleanPointInPolygon(tp, fourthTurfPolygon)) {
-			retval = true;
-		}
-	}
-
-
-
-
-
-	if (checkGilman.checked) {
-		if (turf.booleanPointInPolygon(tp, gilmanTurfPolygon)) {
-			retval = true;
-		}
-	}
-
-	if (checkWestbrae.checked) {
-		if (turf.booleanPointInPolygon(tp, westbraeTurfPolygon)) {
-			retval = true;
-		}
-	}
-
-	if (checkNorthbrae.checked) {
-		if (turf.booleanPointInPolygon(tp, northbraeTurfPolygon)) {
-			retval = true;
-		}
-	}
-
-	if (checkSolano.checked) {
-		if (turf.booleanPointInPolygon(tp, solanoTurfPolygon)) {
-			retval = true;
-		}
-	}
-
-	if (checkNorthshattuck.checked) {
-		if (turf.booleanPointInPolygon(tp, northshattuckTurfPolygon)) {
-			retval = true;
-		}
-	}
-
-
-
-	if (checkUniversity.checked) {
-		if (turf.booleanPointInPolygon(tp, universityTurfPolygon)) {
-			retval = true;
-		}
-	}
-
-	if (checkTelegraph.checked) {
-		if (turf.booleanPointInPolygon(tp, telegraphTurfPolygon)) {
-			retval = true;
-		}
-	}
-
-	if (checkElmwood.checked) {
-		if (turf.booleanPointInPolygon(tp, elmwoodTurfPolygon)) {
-			retval = true;
-		}
-	}
-
-
-	if (checkLorin.checked) {
-		if (turf.booleanPointInPolygon(tp, lorinTurfPolygon)) {
-			retval = true;
-		}
-	}
-	// ADD NEW GEO FILTER
-
-
-	if (checkSanpabloave.checked) {
-		if (turf.booleanPointInPolygon(tp, sanpabloaveTurfPolygon)) {
-			retval = true;
-		}
-	}
-
-	if (checkUniversityave.checked) {
-		if (turf.booleanPointInPolygon(tp, universityaveTurfPolygon)) {
-			retval = true;
-		}
-	}
-
-	if (checkSacramentoave.checked) {
-		if (turf.booleanPointInPolygon(tp, sacramentoaveTurfPolygon)) {
-			retval = true;
-		}
-	}
-	if (checkMlkway.checked) {
-		if (turf.booleanPointInPolygon(tp, mlkwayTurfPolygon)) {
-			retval = true;
-		}
-	}
-
-
-
-	return retval;
-
-}
 var nCountVacant = 0;
 var nCountShop = 0;
 var nCountLand = 0;
@@ -794,9 +684,9 @@ const veryNarrowStreetskm = 14;
 
 const ftPerKm = 1602;
 
-const regStreetsft = regStreetskm*ftPerKm;
-const narrowStreetsft = narrowStreetskm*ftPerKm;
-const veryNarrowStreetsft = veryNarrowStreetskm*ftPerKm;
+const regStreetsft = regStreetskm * ftPerKm;
+const narrowStreetsft = narrowStreetskm * ftPerKm;
+const veryNarrowStreetsft = veryNarrowStreetskm * ftPerKm;
 
 const parkability = 0.67;  // computed from sample blocks, percent of length usable for parking
 
@@ -804,17 +694,43 @@ const regStreetSides = 2;
 const narrowStreetSides = 1;
 const veryNarrowStreetSides = 0;
 
-const regStreetsParking = Math.floor(regStreetsft*regStreetSides* parkability / carLength);
-const narrowStreetsParking = Math.floor( narrowStreetsft*narrowStreetSides* parkability / carLength);
-const veryNarrowStreetsParking = Math.floor(veryNarrowStreetsft*veryNarrowStreetSides* parkability / carLength);
+const regStreetsParking = Math.floor(regStreetsft * regStreetSides * parkability / carLength);
+const narrowStreetsParking = Math.floor(narrowStreetsft * narrowStreetSides * parkability / carLength);
+const veryNarrowStreetsParking = Math.floor(veryNarrowStreetsft * veryNarrowStreetSides * parkability / carLength);
 
+function totalStreetParking() {
+	return regStreetsParking + narrowStreetsParking + veryNarrowStreetsParking;
+}
+function areaStreetParking() {
+	return Math.floor(totalStreetParking() * SQUARE_METERS_PER_STREET_PARKING_SPACE);
+}
 function makeStreetMsg() {
-	var msg = 
-	
-	'Street Parking >=26 feet: ' + regStreetsParking + '</br>' + 
-	'Street Parking 20-26 feet: ' + narrowStreetsParking + '</br>' + 
-	'Street Parking: <= 20 feet: ' + veryNarrowStreetsParking + '</br>';
 
+	var msg =
+
+		'Street Parking >=26 feet: ' + regStreetsParking + '</br>' +
+		'Street Parking 20-26 feet: ' + narrowStreetsParking + '</br>' +
+		'Street Parking: <= 20 feet: ' + veryNarrowStreetsParking + '</br>' +
+		'Street Parking Area (m^2): ' + areaStreetParking() + '</br>' +
+		'Street Parking Area Percentage: ' + (100.0 * areaStreetParking() / CITY_LAND_AREA).toFixed(2) + '</br>'
+	return msg;
+}
+
+function totalSFHParking() {
+	return Math.floor(SFH_COUNT * OFFSTREET_HOUSING_PER_SFH);
+}
+function areaSFHParking() {
+	return Math.floor(totalSFHParking() * SQUARE_METERS_PER_STREET_PARKING_SPACE);
+}
+function makeSFHMesg() {
+
+	var msg =
+
+		'Single Family Houses: ' + SFH_COUNT + '</br>' +
+		'SFH Parking per House: ' + OFFSTREET_HOUSING_PER_SFH + '</br>' +
+		'SFH Offstreet Parking: ' + totalSFHParking() + '</br>' +
+		'Street Parking Area (m^2): ' + areaSFHParking() + '</br>' +
+		'Street Parking Area Percentage: ' + (100.0 * areaSFHParking() / CITY_LAND_AREA).toFixed(2) + '</br>';
 	return msg;
 }
 
@@ -989,7 +905,7 @@ function addMarkers(osmJson) {
 
 					osmItem.properties.tags.computed_area = Math.floor(area);
 
-					osmItem.properties.tags.computed_capacity = Math.floor(area / SQAURE_METERS_PER_PARKING_SPACE);
+					osmItem.properties.tags.computed_capacity = Math.floor(area / SQUARE_METERS_PER_PARKING_SPACE);
 
 				}
 				var msg = nodePopup(tags);
@@ -1016,7 +932,7 @@ function addMarkers(osmJson) {
 
 					osmItem.properties.tags.computed_area = Math.floor(area);
 
-					osmItem.properties.tags.computed_capacity = Math.floor(area / SQAURE_METERS_PER_PARKING_SPACE);
+					osmItem.properties.tags.computed_capacity = Math.floor(area / SQUARE_METERS_PER_PARKING_SPACE);
 				}
 				var msg = nodePopup(tags);
 				polyMarker.bindPopup(msg);
@@ -1055,7 +971,13 @@ function addMarkers(osmJson) {
 
 
 
-	const streetMsg = makeStreetMsg() ;
+	const sfhMesg = makeSFHMesg();
+
+	const streetMsg = makeStreetMsg();
+
+	const countTotalSpaces = countParkingSpaces + totalStreetParking() + totalSFHParking();
+	const areaTotalSpaces = areaParking + areaStreetParking() + areaSFHParking();
+
 
 	const summaryMsg = '<br>Parking lots:' + countParkingLots +
 		'<br>Parking Lot Spaces: ' + countParkingSpaces +
@@ -1064,10 +986,19 @@ function addMarkers(osmJson) {
 		// 27.02 km2 city land area on wikipedia
 
 		+ '<br>' + '<br>'
-		+ streetMsg
+		+ streetMsg + '<br>'
+		+ sfhMesg + '<br>'
+
+		+
+		'<br>Total Parking Spaces: ' + countTotalSpaces +
+		'<br>Total Parking Area (m^2): ' + Math.floor(areaTotalSpaces) +
+		'<br>Total Area percentage : ' + (100.0 * areaTotalSpaces / CITY_LAND_AREA).toFixed(2)
+
+
+
 		+ '<br>';
-		
-	
+
+
 
 	summary.innerHTML = summaryMsg;
 
@@ -1335,43 +1266,9 @@ function handleFilterClick() {
 
 	removeAllMakers();
 	addMarkers(osmGeoJson
-		//checkActive.checked,
-		//checkAmenity.checked,
-		//checkVacant.checked,
-		//	checkLand.checked
-		//	checkDisusedAmenity.checked,
-		//	checkOtherAmenity.checked 
-		/*, histYearData, histHourData, histFaultData, histAgeInjuryData,
-	
-			selectVehicleTypes.value,
-	
-			check2024.checked,
-			check2023.checked,
-			check2022.checked,
-			check2021.checked,
-			check2020.checked,
-	
-			check2019.checked,
-			check2018.checked,
-			check2017.checked,
-			check2016.checked,
-			check2015.checked,
-	
-			selectStreet.value,
-			selectSeverity.value,
-			selectStopResult.value*/
+		
 	);
-	/*
-		addMarkers(vacantJson, true,
 	
-			checkShop.checked,
-			checkAmenity.checked,
-	
-			checkDisusedShop.checked,
-			checkDisusedAmenity.checked,
-	
-			checkOtherAmenity.checked
-		);*/
 
 	// ADD NEW CHART
 	const dataParking = [];
@@ -1476,6 +1373,123 @@ saveanchor.addEventListener(
 
 /* unused stuff
 
+function checkGeoFilter(tp) {
+
+	var retval = false;
+
+	if (checkBerkeley.checked) {
+		if (turf.booleanPointInPolygon(tp, berkeleyTurfPolygon)) {
+			retval = true;
+		}
+	}
+
+	if (checkDowntown.checked) {
+		if (turf.booleanPointInPolygon(tp, downtownTurfPolygon)) {
+			retval = true;
+		}
+	}
+	if (checkNorthside.checked) {
+		if (turf.booleanPointInPolygon(tp, northsideTurfPolygon)) {
+			retval = true;
+		}
+	}
+	if (checkFourth.checked) {
+		if (turf.booleanPointInPolygon(tp, fourthTurfPolygon)) {
+			retval = true;
+		}
+	}
+
+
+
+
+
+	if (checkGilman.checked) {
+		if (turf.booleanPointInPolygon(tp, gilmanTurfPolygon)) {
+			retval = true;
+		}
+	}
+
+	if (checkWestbrae.checked) {
+		if (turf.booleanPointInPolygon(tp, westbraeTurfPolygon)) {
+			retval = true;
+		}
+	}
+
+	if (checkNorthbrae.checked) {
+		if (turf.booleanPointInPolygon(tp, northbraeTurfPolygon)) {
+			retval = true;
+		}
+	}
+
+	if (checkSolano.checked) {
+		if (turf.booleanPointInPolygon(tp, solanoTurfPolygon)) {
+			retval = true;
+		}
+	}
+
+	if (checkNorthshattuck.checked) {
+		if (turf.booleanPointInPolygon(tp, northshattuckTurfPolygon)) {
+			retval = true;
+		}
+	}
+
+
+
+	if (checkUniversity.checked) {
+		if (turf.booleanPointInPolygon(tp, universityTurfPolygon)) {
+			retval = true;
+		}
+	}
+
+	if (checkTelegraph.checked) {
+		if (turf.booleanPointInPolygon(tp, telegraphTurfPolygon)) {
+			retval = true;
+		}
+	}
+
+	if (checkElmwood.checked) {
+		if (turf.booleanPointInPolygon(tp, elmwoodTurfPolygon)) {
+			retval = true;
+		}
+	}
+
+
+	if (checkLorin.checked) {
+		if (turf.booleanPointInPolygon(tp, lorinTurfPolygon)) {
+			retval = true;
+		}
+	}
+	// ADD NEW GEO FILTER
+
+
+	if (checkSanpabloave.checked) {
+		if (turf.booleanPointInPolygon(tp, sanpabloaveTurfPolygon)) {
+			retval = true;
+		}
+	}
+
+	if (checkUniversityave.checked) {
+		if (turf.booleanPointInPolygon(tp, universityaveTurfPolygon)) {
+			retval = true;
+		}
+	}
+
+	if (checkSacramentoave.checked) {
+		if (turf.booleanPointInPolygon(tp, sacramentoaveTurfPolygon)) {
+			retval = true;
+		}
+	}
+	if (checkMlkway.checked) {
+		if (turf.booleanPointInPolygon(tp, mlkwayTurfPolygon)) {
+			retval = true;
+		}
+	}
+
+
+
+	return retval;
+
+}
 	
 */
 
