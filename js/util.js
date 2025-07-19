@@ -749,6 +749,9 @@ function addMarkers(osmJson) {
 	var countParkingSpaces = 0;
 	var areaParking = 0;  // area in sq meters
 
+	var checkComputed=0;
+	var checkCapacity=0;
+
 	for (const osmItem of osmJson.features) {
 		//const attr = osmItem.elements; 
 		//const tags = osmItem.tags;
@@ -836,6 +839,7 @@ function addMarkers(osmJson) {
 				incrementMapKey(histParkingData, arrParkingKeys[2]);
 			}
 
+	
 			/*
 						if (bVacant) {
 							nCountVacant++;
@@ -944,6 +948,9 @@ function addMarkers(osmJson) {
 				const datum = { x: parseInt(tags.capacity), y: tags.computed_capacity };
 				dataCapacityVsCalculated.push(datum);
 
+				checkCapacity +=parseInt(tags.capacity);
+				checkComputed += tags.computed_capacity;
+
 			}
 
 			countParkingLots++;
@@ -968,6 +975,10 @@ function addMarkers(osmJson) {
 	console.log('Skipped', skipped);
 	console.log('Plotted', plotted);
 	console.log("markerCount ", markerCount)
+
+	console.log( "total computed ", checkComputed)
+	console.log( "total capacity ", checkCapacity)
+	console.log("Check capacity estimate " , checkComputed / checkCapacity);
 
 
 
