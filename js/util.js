@@ -729,8 +729,8 @@ function makeSFHMesg() {
 		'Single Family Houses: ' + SFH_COUNT + '</br>' +
 		'SFH Parking per House: ' + OFFSTREET_HOUSING_PER_SFH + '</br>' +
 		'SFH Offstreet Parking: ' + totalSFHParking() + '</br>' +
-		'Street Parking Area (m^2): ' + areaSFHParking() + '</br>' +
-		'Street Parking Area Percentage: ' + (100.0 * areaSFHParking() / CITY_LAND_AREA).toFixed(2) + '</br>';
+		'SFH Parking Area (m^2): ' + areaSFHParking() + '</br>' +
+		'SFH Parking Area Percentage: ' + (100.0 * areaSFHParking() / CITY_LAND_AREA).toFixed(2) + '</br>';
 	return msg;
 }
 
