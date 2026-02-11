@@ -267,126 +267,9 @@
 			<input type="checkbox" id="checkStreetVeryNarrow" checked="yes"> <label for="checkStreetVeryNarrow">Street Parking &leq; 20 feet (14km)</label><br>
 
 <br />
-	<!--
-			<label>Select by Geography</label>
-			<br />
-
-<input type="checkbox" id="checkBerkeley" checked="yes"> <label for="checkBerkeley">Berkeley</label><br>
-
-<label>Business Districts</label><br/>
-<input type="checkbox" id="checkDowntown"> <label for="checkDowntown">Downtown</label><br>
-<input type="checkbox" id="checkNorthside"> <label for="checkNorthside">Northside</label><br>
-<input type="checkbox" id="checkFourth"> <label for="checkFourth">Fourth</label><br>
-<input type="checkbox" id="checkGilman"> <label for="checkGilman">Gilman</label><br>
-<input type="checkbox" id="checkWestbrae"> <label for="checkWestbrae">Westbrae</label><br>
-<input type="checkbox" id="checkNorthbrae"> <label for="checkNorthbrae">Northbrae</label><br>
-<input type="checkbox" id="checkSolano"> <label for="checkSolano">Solano</label><br>
-<input type="checkbox" id="checkNorthshattuck"> <label for="checkNorthshattuck">Northshattuck</label><br>
-<input type="checkbox" id="checkUniversity"> <label for="checkUniversity">University</label><br>
-<input type="checkbox" id="checkTelegraph"> <label for="checkTelegraph">Telegraph</label><br>
-<input type="checkbox" id="checkElmwood"> <label for="checkElmwood">Elmwood</label><br>
-<input type="checkbox" id="checkLorin"> <label for="checkLorin">Lorin</label><br>
-
-<label>Streets</label><br/>
-<input type="checkbox" id="checkSanpabloave"> <label for="checkSanpabloave">San Pablo Avenue</label><br>
-<input type="checkbox" id="checkUniversityave"> <label for="checkUniversityave">University Avenue</label><br>
-<input type="checkbox" id="checkSacramentoave"> <label for="checkSacramentoave">Sacramento Avenue</label><br>
-<input type="checkbox" id="checkMlkway"> <label for="checkSacracheckMlkwaymentoave">MLK Way</label><br>
-
-	-->
-
-<!-- ADD NEW GEO FILTER -->
-
-<!---
-
-Fourth
 
 
 
-
-
-
-
-
-
-
-			<input type="checkbox" id="check2024"> <label for="check2024">2024</label><br>
-			<input type="checkbox" id="check2023"> <label for="check2023">2023</label><br>
-			<input type="checkbox" id="check2022"> <label for="check2022">2022</label><br>
-			<input type="checkbox" id="check2021"> <label for="check2021">2021</label><br>
-			<input type="checkbox" id="check2020"> <label for="check2020">2020</label><br>
-			<input type="checkbox" id="check2019"> <label for="check2019">2019</label><br>
-			<input type="checkbox" id="check2018"> <label for="check2018">2018</label><br>
-			<input type="checkbox" id="check2017"> <label for="check2017">2017</label><br>
-			<input type="checkbox" id="check2016"> <label for="check2016">2016</label><br>
-			<input type="checkbox" id="check2015"> <label for="check2015">2015</label><br>
-
-
-
-			<br />
-			<label>Pick crash participants</label>
-			<br />
-			<select id="selectVehicleTypes" class="select">
-				<option value='.*'>Any</option>
-				<option value='Car'>Car/Any</option>
-				<option value='Bi.*Car'>Car/Bicycle</option>
-				<option value='Car.*Ped|Ped.*Car'>Car/Pedestrian</option>
-				<option value='Car.*Solo|Car.*Object'>Car/Solo</option>
-
-				<option value='Bi'>Bicycle/Any</option> // includes electric bike?
-				<option value='Bi.*Ped'>Bicycle/Pedestrian</option>
-				<option value='Bicycle$|Bi.*Solo'>Bicycle/Solo</option>
-
-				<option value='Ped'>Pedestrian/Any</option>
-
-				<option value='Electric Bi'>Electric bicycle/Any</option>
-				<option value='Electric Bi.*Ped'>Electric bicycle/Pedestrian</option>
-				<option value='Electric Sc'>Electric Scooter/Any</option>
-				<option value='Electric Sc.*Ped'>Electric Scooter/Pedestrian</option>
-				<option value='Electric Skate'>Electric Skateboard/Any</option>
-				<option value='Electric Skate.*Ped'>Electric Skateboard/Pedestrian</option>
-
-				<option value='Motor'>Motorcycle/Any</option>
-				<option value='Motor.*Car'>Motorcycle/Car</option>
-
-				<option value='Truck'>Truck/Any</option>
-
-				<option value='Bus'>Bus/Any</option>
-			</select>
-			<br />
-
-			<label>Pick street</label>
-			<select id="selectStreet" class="select">
-				<option>Any</option>
-			</select>
-
-			<label>Pick crash severity</label>
-			<br />
-
-			<select id='severity' class="select">
-				<option value='Any'>Any</option>
-				<option value='Fatal'>Fatality</option>
-				<option value='Serious Injury'>Serious Injury</option>
-				<option value='Minor Injury'>Minor Injury</option>
-				<option value='Possible Injury'>Possible Injury</option>
-				<option value='No Injury'>Non-Injury</option>
-			</select>
-
-			<br />
-			<label>Pick stop result</label>
-			<br />
-
-			<select id='stopResult' class="select">
-				<option value='Any'>Any</option>
-				<option value='Arrest'>Arrest</option>
-				<option value='Citation'>Citation</option>
-				<option value='Warning'>Warning</option>
-				<option value='No Action'>No Action</option>
-			</select>
-
-			<br />
-
-			--->
 
 			<button id="filterButton" class="button">Filter</button>
 			
@@ -397,24 +280,7 @@ Fourth
 			<!-- ADD NEW CHART -->
 			<div><canvas id="parkingHist" class="chart"></canvas></div>
 			<div><canvas id="countVsCalculationScatter" class="chart"></canvas></div>
-			<!---
-
-					<div><canvas id="shopHist" class="chart"></canvas></div>
 		
-			<div><canvas id="yearHist" class="chart"></canvas></div>
-			<div><canvas id="hourHist" class="chart"></canvas></div>
-			<div><canvas id="involvedObjectHist" class="chart collisionChart"></canvas></div>
-			<div><canvas id="severityHist" class="chart collisionChart"></canvas></div>
-
-			<div><canvas id="crashFaultHist" class="chart collisionChart"></canvas></div>
-			<div><canvas id="ageInjuryHist" class="chart collisionChart"></canvas></div>
-			
-
-			<div><canvas id="stopResultHist" class="chart stopChart"></canvas></div>
-
-
-			<div><canvas id="gpsHist" class="chart"></canvas></div>
-			-->
 		</div>
 		<div id="osm-map"></div>
 	</div>
@@ -435,8 +301,7 @@ Fourth
 		} from "./js/util.js";
 
 		// BEGIN INIT STUFF
-		//const selectStreet = document.querySelector('#selectStreet');
-		//populateStreetSelect(mergedTransparencyJson, selectStreet);
+
 
 		// END INIT STUFF
 
@@ -444,41 +309,6 @@ Fourth
 			handleFilterClick();
 
 		});
-/*
-		document.querySelector('#selectData').addEventListener('change', (event) => {
-
-			console.log("Setting visisbility")
-
-			const dataSpec = document.querySelector('#selectData').value;
-
-			var r = document.querySelector(':root');
-
-
-			switch (selectData.value) {
-				case 'T':
-				case 'S':
-				case "SUT":
-					for (const elem of document.querySelectorAll('.stopChart')) {
-						elem.style.display = 'none';
-					}
-					for (const elem of document.querySelectorAll('.collisionChart')) {
-						elem.style.display = '';
-					}
-					break;
-				case "STOPS":
-					r.style.setProperty('--displayCollisionChart', 'none');
-					r.style.setProperty('--displayStopChart', 'inline-block');
-					for (const elem of document.querySelectorAll('.collisionChart')) {
-						elem.style.display = 'none';
-					}
-					for (const elem of document.querySelectorAll('.stopChart')) {
-						elem.style.display = '';
-					}
-					break;
-
-			};
-		})
-*/
 
 	</script>
 </body>

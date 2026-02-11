@@ -23,17 +23,7 @@ Chart.defaults.font.size = 14;
 const selectData = document.querySelector('#selectData');
 const selectMapTiles = document.querySelector('#selectMapTiles');
 
-const checkActive = document.querySelector('#checkActive');
-//const checkAmenity = document.querySelector('#checkAmenity');
 
-const checkVacant = document.querySelector('#checkVacant');
-const checkLand = document.querySelector('#checkLand');
-
-/*
-const checkNode = document.querySelector('#checkNode');
-const checkWay = document.querySelector('#checkWay');
-const checkRelation = document.querySelector('#checkRelation');
-*/
 
 const checkMultilevel = document.querySelector('#checkMultilevel');
 const checkUnderground = document.querySelector('#checkUnderground');
@@ -46,28 +36,6 @@ const checkStreetNarrow = document.querySelector('#checkStreetNarrow');
 const checkStreetVeryNarrow = document.querySelector('#checkStreetVeryNarrow');
 
 // geo filters
-const checkBerkeley = document.querySelector('#checkBerkeley');
-const checkDowntown = document.querySelector('#checkDowntown');
-const checkNorthside = document.querySelector('#checkNorthside');
-const checkFourth = document.querySelector('#checkFourth');
-const checkGilman = document.querySelector('#checkGilman');
-const checkWestbrae = document.querySelector('#checkWestbrae');
-const checkNorthbrae = document.querySelector('#checkNorthbrae');
-const checkSolano = document.querySelector('#checkSolano');
-const checkNorthshattuck = document.querySelector('#checkNorthshattuck');
-const checkUniversity = document.querySelector('#checkUniversity');
-const checkTelegraph = document.querySelector('#checkTelegraph');
-const checkElmwood = document.querySelector('#checkElmwood');
-const checkLorin = document.querySelector('#checkLorin');
-
-const checkTemescal = document.querySelector('#checkTemescal');
-const checkValencia = document.querySelector('#checkValencia');
-
-// ADD NEW GEO FILTER
-const checkSanpabloave = document.querySelector('#checkSanpabloave');
-const checkUniversityave = document.querySelector('#checkUniversityave');
-const checkSacramentoave = document.querySelector('#checkSacramentoave');
-const checkMlkway = document.querySelector('#checkMlkway');
 
 
 
@@ -670,9 +638,8 @@ function getPointFromeature(feature) {
 				}*/
 
 
-var nCountVacant = 0;
-var nCountShop = 0;
-var nCountLand = 0;
+
+
 
 var dataCapacityVsCalculated = [];
 
@@ -692,7 +659,7 @@ const parkability = 0.67;  // computed from sample blocks, percent of length usa
 
 const regStreetSides = 2;
 const narrowStreetSides = 1;
-const veryNarrowStreetSides = 0;
+const veryNarrowStreetSides = 0.5;
 
 const regStreetsParking = Math.floor(regStreetsft * regStreetSides * parkability / carLength);
 const narrowStreetsParking = Math.floor(narrowStreetsft * narrowStreetSides * parkability / carLength);
@@ -749,8 +716,8 @@ function addMarkers(osmJson) {
 	var countParkingSpaces = 0;
 	var areaParking = 0;  // area in sq meters
 
-	var checkComputed=0;
-	var checkCapacity=0;
+	var checkComputed = 0;
+	var checkCapacity = 0;
 
 	for (const osmItem of osmJson.features) {
 		//const attr = osmItem.elements; 
@@ -788,14 +755,8 @@ function addMarkers(osmJson) {
 		}
 
 
-
-
-
-		//console.log('osm item loop ', osmItem.geometry.type, ' ', tags.id);
-
 		if (!tags) {
-			//console.log("no tags")
-			//	incrementMapKey(histShopData, arrShopKeys[2]);
+		
 			continue;
 		}
 
@@ -803,7 +764,7 @@ function addMarkers(osmJson) {
 
 		if (!bInclude) {
 			//	console.log("Filtered out ", tags.name);
-			//	incrementMapKey(histShopData, arrShopKeys[2]);
+		
 			continue;
 		}
 
@@ -819,13 +780,6 @@ function addMarkers(osmJson) {
 			const loc = [lat, long];
 			const tp = turf.point([long, lat]);
 
-			/* turn off geofilter for now 
-			const bGeoFilter = checkGeoFilter(tp);
-			if (!bGeoFilter) {
-				continue;
-			}
-			*/
-
 			tags.lat = lat;
 			tags.lon = long;
 			const arrParkingKeys = ['Surface', 'Multilevel', 'Underground'];
@@ -839,32 +793,10 @@ function addMarkers(osmJson) {
 				incrementMapKey(histParkingData, arrParkingKeys[2]);
 			}
 
-	
-			/*
-						if (bVacant) {
-							nCountVacant++;
-							incrementMapKey(histShopData, arrShopKeys[1]);
-						}
-						if (bShop) {
-							incrementMapKey(histShopData, arrShopKeys[0]);
-							nCountShop++;
-							opt = getOptionsForMarker('active');
-						}
-						if (bLand) {
-							nCountLand++;
-							incrementMapKey(histShopData, arrShopKeys[2]);
-						}
-			*/
+
+
 			var opt = getOptionsForMarker('active');
-			/*
-			if (bVacant) {
-				opt = getOptionsForMarker('vacant');
-			}
-			if (bLand) {
-				opt = getOptionsForMarker('land');
-				opt.fillOpacity = .3
-				L.geoJSON(osmItem, opt).addTo(map);
-			}*/
+
 
 			if (bNode) {
 				// can't estimate capacity from area
@@ -948,7 +880,7 @@ function addMarkers(osmJson) {
 				const datum = { x: parseInt(tags.capacity), y: tags.computed_capacity };
 				dataCapacityVsCalculated.push(datum);
 
-				checkCapacity +=parseInt(tags.capacity);
+				checkCapacity += parseInt(tags.capacity);
 				checkComputed += tags.computed_capacity;
 
 			}
@@ -966,9 +898,7 @@ function addMarkers(osmJson) {
 
 			markerCount++;
 		} else {
-			//histMissingGPSData.set(attr.Year, histMissingGPSData.get(attr.Year) + 1);
-			//incrementMapKey(histMissingGPSData, attr.Year);
-			//	incrementMapKey(histShopData, arrShopKeys[2]);
+			
 			skipped++;
 		}
 	}
@@ -976,9 +906,9 @@ function addMarkers(osmJson) {
 	console.log('Plotted', plotted);
 	console.log("markerCount ", markerCount)
 
-	console.log( "total computed ", checkComputed)
-	console.log( "total capacity ", checkCapacity)
-	console.log("Check capacity estimate " , checkComputed / checkCapacity);
+	console.log("total computed ", checkComputed)
+	console.log("total capacity ", checkCapacity)
+	console.log("Check capacity estimate ", checkComputed / checkCapacity);
 
 
 
@@ -1028,45 +958,7 @@ function addMarkers(osmJson) {
 var histParkingData = new Map();  // bars Shop, Vacant
 const arrParkingKeys = ['Surface', 'Multilevel', 'Underground'];
 
-/*
 
-var histShopData = new Map();  // bars Shop, Vacant
-const arrShopKeys = ['Active', 'Vacant', 'Land'];
-const histYearData = new Map();
-const histHourData = new Map();
-const arrHourKeys = [0, 3, 6, 9, 12, 15, 18, 21];
-
-const histMissingGPSData = new Map();
-var histFaultData = new Map();
-
-var histSeverityData = new Map();
-var histObjectData = new Map();
-
-
-var histAgeInjuryData = new Map();  // bars 0-9, 10-19, 20-, 30, 40, 50, 60, 70, 80+
-const arrAgeKeys = [0, 10, 20, 30, 40, 50, 60, 70, 80];
-/
-var histStopResultData = new Map();
-const arrStopResultKeys = [stopArrest, stopCitation, stopWarning, stopNoAction, stopUnkown];
-
-
-const arrSeverityKeys = [
-	"Unspecified Injury",
-	"No Injury",
-
-	"Possible Injury",
-	"Minor Injury",
-
-	"Serious Injury",
-	"Fatal"
-
-
-];
-
-const arrObjectKeys = [
-	"Car", "Motorcycle", "Bicycle", "Pedestrian", "Truck", "Bus", "Parked Car", "Object", "Electric Bike", "Electric Scooter", "Electric Skateboard"
-];
-*/
 /* histogram data */
 function clearHistData(keys, data) {
 	for (const f of keys) {
@@ -1076,64 +968,12 @@ function clearHistData(keys, data) {
 
 // ADD NEW CHART
 clearHistData(arrParkingKeys, histParkingData);
-/*
-clearHistData(arrShopKeys, histShopData);
-clearHistData(arrObjectKeys, histObjectData);
-clearHistData(arrSeverityKeys, histSeverityData);
-clearHistData(arrAgeKeys, histAgeInjuryData);
-clearHistData(arrStopResultKeys, histStopResultData);
-clearHistData(arrHourKeys, histHourData);
-
-
-// clear data functions
-function clearHistYearData() {
-	for (var y = 2015; y < 2025; y++) {
-		histYearData.set(y, 0);
-		histMissingGPSData.set(y, 0);
-	}
-}
-clearHistYearData();
-*/
-/*
-const faultKeys = [
-	"Bicyclist",
-	"Driver",
-	"Object",
-	"Other",
-	"Pedestrian"
-];
-
-function clearFaultData() {
-	for (const f of faultKeys) {
-		histFaultData.set(f, 0);
-	}
-}
-clearFaultData();
-*/
 
 // chart variables
 // ADD NEW CHART
 var histParkingChart;
 
 var scatterCapacity;
-
-/*
-var histShopChart;
-
-var histYearChart;
-var histHourChart;
-
-var histChartGPS;
-var histFaultChart;
-
-var histObjectChart;
-var histSeverityChart;
-var histAgeInjuryChart;
-
-var histStopResultChart;
-
-*/
-
 
 function addData(chart, label, newData) {
 	chart.data.labels.push(label);
@@ -1234,7 +1074,6 @@ function createOrUpdateChart(data, chartVar, element, labelText) {
 			}
 		);
 	} else {
-		//const newData = data.map(row => row.count);
 		// update data
 
 		const newData = {
@@ -1255,31 +1094,16 @@ function handleFilterClick() {
 	// ADD NEW CHART
 	clearHistData(arrParkingKeys, histParkingData);
 
-	/*	
-	clearHistData(arrShopKeys, histShopData);clearHistYearData();
-		clearHistData(arrHourKeys, histHourData);
-		clearFaultData();
-		clearHistData(arrObjectKeys, histObjectData);
-		clearHistData(arrSeverityKeys, histSeverityData);
-		clearHistData(arrAgeKeys, histAgeInjuryData);
-		clearHistData(arrStopResultKeys, histStopResultData);
-	
-		const dataSpec = selectData.value;
-		var tsSet;
-		var collData = shopJson;
-	*/
 
 	// reset summary counts 
-	nCountVacant = 0
 
-	nCountShop = 0
-	nCountLand = 0;
+
 
 	removeAllMakers();
 	addMarkers(osmGeoJson
-		
+
 	);
-	
+
 
 	// ADD NEW CHART
 	const dataParking = [];
@@ -1288,32 +1112,6 @@ function handleFilterClick() {
 		dataParking.push({ bar: k, count: histParkingData.get(k) })
 	}
 
-	/*	
-		const dataShops = [];
-	for (const k of arrShopKeys) {
-		dataShops.push({ bar: k, count: histShopData.get(k) })
-	}
-	const dataFault = [];
-		for (const k of faultKeys) {
-			dataFault.push({ bar: k, count: histFaultData.get(k) })
-		}
-	
-		const dataObject = [];
-		for (const k of arrObjectKeys) {
-			dataObject.push({ bar: k, count: histObjectData.get(k) })
-		}
-	
-		const dataSeverity = [];
-		for (const k of arrSeverityKeys) {
-			dataSeverity.push({ bar: k, count: histSeverityData.get(k) })
-		}
-	
-		const dataStopResult = [];
-		for (const k of arrStopResultKeys) {
-			dataStopResult.push({ bar: k, count: histStopResultData.get(k) })
-		}
-	
-	*/
 	// ADD NEW CHART
 	histParkingChart = createOrUpdateChart(dataParking, histParkingChart, document.getElementById('parkingHist'),
 		'Parking');
@@ -1328,47 +1126,7 @@ function handleFilterClick() {
 
 
 
-	/*	
-	
-		histShopChart = createOrUpdateChart(dataShops, histShopChart, document.getElementById('shopHist'),
-		'Commercial sites');
-		histFaultChart = createOrUpdateChart(dataFault, histFaultChart, document.getElementById('crashFaultHist'), 'Collisions by Fault');
-	
-		histObjectChart = createOrUpdateChart(dataObject, histObjectChart, document.getElementById('involvedObjectHist'), 'Crash Particpants');
-	
-		histSeverityChart = createOrUpdateChart(dataSeverity, histSeverityChart, document.getElementById('severityHist'), 'Injury Severity');
-	
-		const dataByYear = [];
-		for (var bar = 2015; bar <= 2024; bar++) {
-			dataByYear.push({ bar: bar, count: histYearData.get(bar) });
-		}
-	
-		histYearChart = createOrUpdateChart(dataByYear, histYearChart, document.getElementById('yearHist'), 'Collisions or Stops by Year');
-	
-		const dataByHour = [];
-		for (const k of arrHourKeys) {
-			dataByHour.push({ bar: k, count: histHourData.get(k) })
-		}
-	
-		histHourChart = createOrUpdateChart(dataByHour, histHourChart, document.getElementById('hourHist'), 'Collisions or Stops by Hour');
-	
-		const dataGPSByYear = [];
-		for (var bar = 2015; bar <= 2024; bar++) {
-			dataGPSByYear.push({ bar: bar, count: histMissingGPSData.get(bar) });
-		}
-	
-		histChartGPS = createOrUpdateChart(dataGPSByYear, histChartGPS, document.getElementById('gpsHist'), 'Missing GPS by Year');
-		//ageInjuryHist
-	
-		const dataInjurybyAge = [];
-		for (const k of arrAgeKeys) {
-			dataInjurybyAge.push({ bar: k, count: histAgeInjuryData.get(k) })
-		}
-	
-		histAgeInjuryChart = createOrUpdateChart(dataInjurybyAge, histAgeInjuryChart, document.getElementById('ageInjuryHist'), 'Injury by Age');
-	
-		histStopResultChart = createOrUpdateChart(dataStopResult, histStopResultChart, document.getElementById('stopResultHist'), 'Stop Results');
-	*/
+
 }
 
 function handleExportClick() {
@@ -1384,131 +1142,13 @@ saveanchor.addEventListener(
 
 /* unused stuff
 
-function checkGeoFilter(tp) {
-
-	var retval = false;
-
-	if (checkBerkeley.checked) {
-		if (turf.booleanPointInPolygon(tp, berkeleyTurfPolygon)) {
-			retval = true;
-		}
-	}
-
-	if (checkDowntown.checked) {
-		if (turf.booleanPointInPolygon(tp, downtownTurfPolygon)) {
-			retval = true;
-		}
-	}
-	if (checkNorthside.checked) {
-		if (turf.booleanPointInPolygon(tp, northsideTurfPolygon)) {
-			retval = true;
-		}
-	}
-	if (checkFourth.checked) {
-		if (turf.booleanPointInPolygon(tp, fourthTurfPolygon)) {
-			retval = true;
-		}
-	}
-
-
-
-
-
-	if (checkGilman.checked) {
-		if (turf.booleanPointInPolygon(tp, gilmanTurfPolygon)) {
-			retval = true;
-		}
-	}
-
-	if (checkWestbrae.checked) {
-		if (turf.booleanPointInPolygon(tp, westbraeTurfPolygon)) {
-			retval = true;
-		}
-	}
-
-	if (checkNorthbrae.checked) {
-		if (turf.booleanPointInPolygon(tp, northbraeTurfPolygon)) {
-			retval = true;
-		}
-	}
-
-	if (checkSolano.checked) {
-		if (turf.booleanPointInPolygon(tp, solanoTurfPolygon)) {
-			retval = true;
-		}
-	}
-
-	if (checkNorthshattuck.checked) {
-		if (turf.booleanPointInPolygon(tp, northshattuckTurfPolygon)) {
-			retval = true;
-		}
-	}
-
-
-
-	if (checkUniversity.checked) {
-		if (turf.booleanPointInPolygon(tp, universityTurfPolygon)) {
-			retval = true;
-		}
-	}
-
-	if (checkTelegraph.checked) {
-		if (turf.booleanPointInPolygon(tp, telegraphTurfPolygon)) {
-			retval = true;
-		}
-	}
-
-	if (checkElmwood.checked) {
-		if (turf.booleanPointInPolygon(tp, elmwoodTurfPolygon)) {
-			retval = true;
-		}
-	}
-
-
-	if (checkLorin.checked) {
-		if (turf.booleanPointInPolygon(tp, lorinTurfPolygon)) {
-			retval = true;
-		}
-	}
-	// ADD NEW GEO FILTER
-
-
-	if (checkSanpabloave.checked) {
-		if (turf.booleanPointInPolygon(tp, sanpabloaveTurfPolygon)) {
-			retval = true;
-		}
-	}
-
-	if (checkUniversityave.checked) {
-		if (turf.booleanPointInPolygon(tp, universityaveTurfPolygon)) {
-			retval = true;
-		}
-	}
-
-	if (checkSacramentoave.checked) {
-		if (turf.booleanPointInPolygon(tp, sacramentoaveTurfPolygon)) {
-			retval = true;
-		}
-	}
-	if (checkMlkway.checked) {
-		if (turf.booleanPointInPolygon(tp, mlkwayTurfPolygon)) {
-			retval = true;
-		}
-	}
-
-
-
-	return retval;
-
-}
-	
 */
 
 
 
 
 export {
-	greenIcon, goldIcon, redIcon,
+
 
 	map, handleFilterClick
 };
